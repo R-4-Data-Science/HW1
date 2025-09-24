@@ -1,0 +1,93 @@
+---
+title: "Hw1"
+output: html_document
+date: "2025-09-24"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 2. Vectors & Factors
+## 2.1 Named numeric vector, attributes
+
+```{r}
+```
+
+## 2.2 Special values & coercion
+
+```{r}
+```
+
+
+## 2.3 Factors
+
+```{r}
+```
+
+# 3 Data Frames & Coercion
+
+```{r}
+```
+
+## 3.1 Data frame construction
+
+```{r}
+```
+
+## 3.2 Coercion rules (vector vs data frame)
+
+```{r}
+```
+
+
+# 4 Subsetting (12 pts)
+
+```{r}
+```
+
+## 4.1 By position, name, logical
+
+```{r}
+```
+
+## 4.2 Negative indices via matching
+
+```{r}
+```
+
+## 4.3 List subsetting differences
+
+```{r}
+```
+
+
+# 5 Matrices & Arrays (18 pts)
+
+```{r}
+```
+
+## 5.1 Model matrix with intercept
+
+```{r}
+```
+
+## 5.2 Least Squares via matrix operations
+
+```{r}
+```
+
+## 5.3 AIC
+
+```{r}
+```
+
+# 6 Model Selection
+
+```{r}
+```
+
+## 6.1 Best model per dimension
+
+```{r}
+```
