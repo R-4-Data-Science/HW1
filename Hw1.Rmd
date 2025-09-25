@@ -156,24 +156,64 @@ class(L$y)
 
 
 
-# 5 Matrices & Arrays (18 pts)
 
-```{r}
-```
+# 5 Matrices & Arrays (18 pts)
 
 ## 5.1 Model matrix with intercept
 
+Pick predictors `S <- c("wt","hp")`.
+
+Describe what the following does `X <- cbind(Intercept = 1, as.matrix(Xdf[, S, drop = FALSE]))`.
+Confirm `dim(X)` and `colnames(X)`.
+
 ```{r}
+S <- c("wt","hp")
+#Binds a vector of 1s and the given vectors of S into a matrix  
+X <- cbind(Intercept = 1, as.matrix(Xdf[, S, drop = FALSE]))  #drop=FALSE keeps the subset as a data frame
+dim(X)
+colnames(X)
+
 ```
 
 ## 5.2 Least Squares via matrix operations
 
+Compute `β^=(X⊤X)−1X⊤y` and `y^=Xβ^` and `RSS=∥y^−y∥22`
+
+Then fit an equivalent lm and verify that your computations are correct.
+
 ```{r}
+#Compute beta hat
+beta_hat <- solve(t(X) %*% X) %*% t(X) %*% y
+beta_hat
+
+#Compute fitted values
+y_hat <- X %*% beta_hat
+head(y_hat) 
+
+#Compute RSS
+RSS <- sum((y - y_hat)^2)
+RSS
+
+#Fit model
+lm_fit <- lm(mpg ~ wt + hp, data = mtcars)
+summary(lm_fit) #matches beta hat
+sum(resid(lm_fit)^2) #matches RSS
 ```
 
 ## 5.3 AIC
 
+Use previous results to compute: `AIC=nlog(RSS/n)+2k`
+with `k = number of estimated parameters incl. intercept and σ`. Compare to `AIC(lm_fit)`.
+ 
 ```{r}
+n <- nrow(X)
+k <- ncol(X)+1
+
+AIC_formula <- n * log(RSS / n) + 2 * k
+AIC_formula
+
+AIC(lm_fit) #not the same as the calculated AIC
+
 ```
 
 # 6 Model Selection
