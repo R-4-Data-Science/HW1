@@ -12,22 +12,60 @@ knitr::opts_chunk$set(echo = TRUE)
 ## 2.1 Named numeric vector, attributes
 
 ```{r}
+wts <- c(10, 20, 30, 40, 50)
+names(wts) <- c("a", "b", "c", "d", "e")
+
+attr(wts, "units") <- "kg"
+
+typeof(wts)
+length(wts)
+names(wts)
+attributes(wts)
 ```
 
 ## 2.2 Special values & coercion
 
 ```{r}
+v <- c(1, NA, NaN, Inf, "2")
+typeof(v)
 ```
 
-
-## 2.3 Factors
+By default, R will coerce mixed data types of numbers and characters into only being characters. That's why `typeof(v)` returns the value "character".
 
 ```{r}
-```
+v_num <- as.numeric(v)
+finite_vals <- v_num[is.finite(v_num)]
+median_val <- median(finite_vals)
+print(median_val)
 
+v_clean <- v_num
+v_clean[!is.finite(v_clean)] <- median_val
+v_clean[is.na(v_clean)] <- median_val
+v_clean
+```
+## 2.3 Factors
+
+In the mtcars dataset, 0 is automatic and 1 is manual. In the displayed table, there are 19 automatics and 13 manuals.
+
+```{r}
+table(mtcars$am)
+am_f <- factor(mtcars$am, 
+               levels = c(0, 1), 
+               labels = c("Automatic", "Manual"))
+am_f
+```
+```{r}
+am_f <- relevel(am_f, ref = "Manual")
+levels(am_f)
+table(am_f)
+
+```
 # 3 Data Frames & Coercion
 
 ```{r}
+id <- 1:6
+group <- factor(c("A", "B", "A", "B", "A", "B"))
+val <- c(10.5, 20.1, NA, 15.2, 30.0, 25.3)
 ```
 
 ## 3.1 Data frame construction
