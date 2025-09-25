@@ -62,20 +62,24 @@ table(am_f)
 ```
 # 3 Data Frames & Coercion
 
-```{r}
-id <- 1:6
-group <- factor(c("A", "B", "A", "B", "A", "B"))
-val <- c(10.5, 20.1, NA, 15.2, 30.0, 25.3)
-```
 
 ## 3.1 Data frame construction
 
+Create a dataframe called df_small with columns: id (1:6), group (a two-level factor variable A/B), val (a numeric variable with one NA value). Ensure classes are respected.
 ```{r}
+id <- 1:6
+group <- factor(c("A", "B", "A", "B", "A", "B"))
+val <- c(8, 1, NA, 15, 25, 13)
+df_small <- data.frame(id, group, val)
 ```
 
 ## 3.2 Coercion rules (vector vs data frame)
 
-```{r}
+Bind `df_small$group` and `df_small$val` into a single vector using c(...). Explain the resulting type and why. Then show a structure that preserves numeric values and group labels for later grouping.
+```{r, results='hide'}
+binded_vector <- c(df_small$group,df_small$val)
+typeof(binded_vector) #Returns "double"
+binded_df <- data.frame(df_small$group,df_small$val) #Preserves values and labels
 ```
 
 
