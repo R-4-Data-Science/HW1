@@ -10,10 +10,11 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # General Information
 
-Github Repo Link: "https://github.com/R-4-Data-Science/HW1"
+Github Repo Link: https://github.com/R-4-Data-Science/HW1
 
-Logan Bolton ChatGPT Link: "https://chatgpt.com/share/68d4c5be-d4e0-800e-971d-5e981b7c0f8f"
-Jonah Kennedy ChatGPT Link: "https://chatgpt.com/share/68d5676f-c670-8008-97f3-b9b5edb6e74e"
+Logan Bolton ChatGPT Link: https://chatgpt.com/share/68d4c5be-d4e0-800e-971d-5e981b7c0f8f
+
+Jonah Kennedy ChatGPT Link: https://chatgpt.com/share/68d5676f-c670-8008-97f3-b9b5edb6e74e
 
 # 2. Vectors & Factors
 ## 2.1 Named numeric vector, attributes
