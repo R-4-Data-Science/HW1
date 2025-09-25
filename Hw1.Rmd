@@ -10,11 +10,15 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # General Information
 
-Logan Bolton ChatGPT Link: "https://chatgpt.com/share/68d4c5be-d4e0-800e-971d-5e981b7c0f8f"
+Github Repo Link: "https://github.com/R-4-Data-Science/HW1"
 
+Logan Bolton ChatGPT Link: "https://chatgpt.com/share/68d4c5be-d4e0-800e-971d-5e981b7c0f8f"
+Jonah Kennedy ChatGPT Link: 
 
 # 2. Vectors & Factors
 ## 2.1 Named numeric vector, attributes
+
+typeof(wts) returns a double vector, length(wts) returns 5, names(wts) shows a–e, and attributes(wts) confirms the custom units = "kg" attribute.
 
 ```{r}
 wts <- c(10, 20, 30, 40, 50)
@@ -30,12 +34,14 @@ attributes(wts)
 
 ## 2.2 Special values & coercion
 
+By default, R will coerce mixed data types of numbers and characters into only being characters. That's why `typeof(v)` returns the value "character".
+
 ```{r}
 v <- c(1, NA, NaN, Inf, "2")
 typeof(v)
 ```
 
-By default, R will coerce mixed data types of numbers and characters into only being characters. That's why `typeof(v)` returns the value "character".
+as.numeric(v) makes numeric values, median(finite_vals) is 1.5, and replacing non-finite entries yields v_clean where NA, NaN, and Inf are all set to 1.5.
 
 ```{r}
 v_num <- as.numeric(v)
@@ -66,8 +72,10 @@ table(am_f)
 
 ```
 # 3 Data Frames & Coercion
-
 ## 3.1 Data frame construction
+
+print(df_small) shows the intended columns. sapply(df_small, class) confirms that id is an integer, group is a factor, and val is double with one NA value.
+
 ```{r}
 id <- 1:6
 group <- factor(c("A", "B", "A", "B", "A", "B"))
@@ -84,7 +92,7 @@ sapply(df_small, class)
 
 When we bind the dataframes together using `c(...)`, it converts everything to a double. This is because R stores the values internally as integers. Then when concatenating the values, everything is converted to the same numeric type and the group labels are lost. 
 
-To prevent this from happening, we need to create a new dataframe that combines these vectors together with binding. This can be accomplished with the regular `data.frame(...)` function.
+To prevent this from happening, we can create a new dataframe that combines these vectors together with binding. This can be accomplished with the regular `data.frame(...)` function.
 
 ```{r}
 concatted = c(df_small$group, df_small$val)
@@ -101,6 +109,8 @@ print(typeof(df_pair))
 
 # 4 Subsetting (12 pts)
 
+`head(y)` prints the first six mpg values. `head(Xdf)` shows all other columns in a data frame.
+
 ```{r}
 y <- mtcars$mpg
 Xdf <- mtcars[, !(names(mtcars) %in% "mpg")]
@@ -110,6 +120,12 @@ head(Xdf)
 ```
 
 ## 4.1 By position, name, logical
+
+`Xdf[, 1:3]` selects the first three columns by position.
+
+`Xdf[, c("hp","wt","qsec")]` selects named columns in that order.
+
+`Xdf[Xdf$wt > 3, ]` filters rows with weight greater than 3.
 
 ### By Position
 ```{r}
@@ -129,6 +145,8 @@ Xdf_wt3 <- Xdf[Xdf$wt > 3, ]
 head(Xdf_wt3)
 ```
 ## 4.2 Negative indices via matching
+
+Dropping vs and am leaves an 8-column data frame, which is confirmed by `ncol(Xdf_drop)`.
 
 ```{r}
 Xdf_drop <- Xdf[, -match(c("vs","am"), names(Xdf))]
@@ -163,10 +181,7 @@ class(L$y)
 
 ## 5.1 Model matrix with intercept
 
-Pick predictors `S <- c("wt","hp")`.
-
-Describe what the following does `X <- cbind(Intercept = 1, as.matrix(Xdf[, S, drop = FALSE]))`.
-Confirm `dim(X)` and `colnames(X)`.
+`cbind(Intercept = 1, as.matrix(...))` creates a model matrix with a column of ones plus wt and hp; `dim(X)` is 32×3 and `colnames(X)` confirms the column names.
 
 ```{r}
 S <- c("wt","hp")
@@ -179,9 +194,7 @@ colnames(X)
 
 ## 5.2 Least Squares via matrix operations
 
-Compute `β^=(X⊤X)−1X⊤y` and `y^=Xβ^` and `RSS=∥y^−y∥22`
-
-Then fit an equivalent lm and verify that your computations are correct.
+`beta_hat` matches the lm coefficients, `y_hat` are the fitted values, and `RSS` equals `sum(resid(lm_fit)^2)`, which verifies the correctness of the matrix solution.
 
 ```{r}
 #Compute beta hat
@@ -204,9 +217,10 @@ sum(resid(lm_fit)^2) #matches RSS
 
 ## 5.3 AIC
 
-Use previous results to compute: `AIC=nlog(RSS/n)+2k`
-with `k = number of estimated parameters incl. intercept and σ`. Compare to `AIC(lm_fit)`.
- 
+We first used the simplified Gaussian AIC, `n*log(RSS/n) + 2k`, which only reflects the deviance part of the log-likelihood. R’s `AIC(lm)` uses the full normal log-likelihood, so it adds the constant term `n*(1 + log(2*pi))` and counts sigma as a parameter.
+
+With n = 32 and k = 4 (intercept, wt, hp, and sigma), my hand value 65.84027 + 32*(1 + log(2*pi)) = 156.6523, which matches AIC(lm_fit)
+
 ```{r}
 n <- nrow(X)
 k <- ncol(X)+1
