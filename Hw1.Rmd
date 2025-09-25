@@ -8,6 +8,11 @@ date: "2025-09-24"
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+# General Information
+
+Logan Bolton ChatGPT Link: "https://chatgpt.com/share/68d4c5be-d4e0-800e-971d-5e981b7c0f8f"
+
+
 # 2. Vectors & Factors
 ## 2.1 Named numeric vector, attributes
 
@@ -62,42 +67,93 @@ table(am_f)
 ```
 # 3 Data Frames & Coercion
 
+## 3.1 Data frame construction
 ```{r}
 id <- 1:6
 group <- factor(c("A", "B", "A", "B", "A", "B"))
 val <- c(10.5, 20.1, NA, 15.2, 30.0, 25.3)
+
+df_small <- data.frame(id = id, group = group, val = val)
+print(df_small)
+sapply(df_small, class)
+
 ```
 
-## 3.1 Data frame construction
-
-```{r}
-```
 
 ## 3.2 Coercion rules (vector vs data frame)
 
+When we bind the dataframes together using `c(...)`, it converts everything to a double. This is because R stores the values internally as integers. Then when concatenating the values, everything is converted to the same numeric type and the group labels are lost. 
+
+To prevent this from happening, we need to create a new dataframe that combines these vectors together with binding. This can be accomplished with the regular `data.frame(...)` function.
+
 ```{r}
+concatted = c(df_small$group, df_small$val)
+print(concatted)
+typeof(concatted)
+```
+```{r}
+df_pair <- data.frame(group = df_small$group,
+                      val   = df_small$val)
+print(df_pair)
+print(typeof(df_pair))
 ```
 
 
 # 4 Subsetting (12 pts)
 
 ```{r}
+y <- mtcars$mpg
+Xdf <- mtcars[, !(names(mtcars) %in% "mpg")]
+
+head(y)
+head(Xdf)
 ```
 
 ## 4.1 By position, name, logical
 
+### By Position
 ```{r}
+Xdf_pos <- Xdf[, 1:3]
+head(Xdf_pos)
 ```
 
+### By Name 
+```{r}
+Xdf_names <- Xdf[, c("hp", "wt", "qsec")]
+head(Xdf_names)
+```
+
+### By Logical Condition 
+```{r}
+Xdf_wt3 <- Xdf[Xdf$wt > 3, ]
+head(Xdf_wt3)
+```
 ## 4.2 Negative indices via matching
 
 ```{r}
+Xdf_drop <- Xdf[, -c(7, 8)]
+head(Xdf_drop)
+
+ncol(Xdf_drop)
 ```
 
 ## 4.3 List subsetting differences
 
 ```{r}
+L <- list(
+  y = y,           
+  X = Xdf,        
+  meta = list(n = nrow(Xdf))
+)
+
+class(L[["y"]])
+
+class(L["y"])
+
+class(L$y)
+
 ```
+
 
 
 # 5 Matrices & Arrays (18 pts)
