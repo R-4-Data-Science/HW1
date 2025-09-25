@@ -131,13 +131,15 @@ head(Xdf_wt3)
 ## 4.2 Negative indices via matching
 
 ```{r}
-Xdf_drop <- Xdf[, -c(7, 8)]
+Xdf_drop <- Xdf[, -match(c("vs","am"), names(Xdf))]
 head(Xdf_drop)
 
 ncol(Xdf_drop)
 ```
 
 ## 4.3 List subsetting differences
+
+L[["y"]] returns the object itself (a numeric vector). L["y"] returns a one-element list that still wraps the vector. L$y is equivalent to L[["y"]] for a named element.
 
 ```{r}
 L <- list(
@@ -230,7 +232,7 @@ We the want to store all these into a single object.
 
 ```{r}
 #Load Data
-adult_df <- read.csv("C:/Users/jaken/Downloads/adult.csv", sep = ";")
+adult_df <- read.csv("adult.csv", sep = ";")
 
 #Fixes to data frame
 adult_df <- adult_df[,-1]
