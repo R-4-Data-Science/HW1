@@ -178,10 +178,218 @@ class(L$y)
 
 # 6 Model Selection
 
+The “adult.csv” dataset can be found on Canvas (Files/Data) and collects census information paired with individuals’ salary and earnings. We want to explain/predict the binary response = NA., which represents whether an individual’s income is above \(50\)k, using all other columns as predictors. Therefore you will be using logistic regression (see glm function). More specifically, the goal is to estimate \(m = 5\) models per dimension, with dimensions going from 1 to \(p_{max}\) (i.e. \(p^* = 1,..., p_{max}\)). For this data we have \(p = 14\) variables (in addition to the response) so in the first dimension you will estimate all 14 one-variable models. Then, in the second dimension, we estimate \(m\) distinct randomly chosen two-variable models (each with distinct variable combinations in them), and so on for all other dimensions up to \(p_{max} = 5\).
+
+For all dimensions, make sure you save:
+
+- the variables in each model, with their regression coefficients and their p-values
+- the AIC of each model
+- a table representing the number of models each predictor is included in
+
+We the want to store all these into a single object.
+
 ```{r}
+#Load Data
+adult_df <- read.csv("C:/Users/jaken/Downloads/adult.csv", sep = ";")
+
+#Fixes to data frame
+adult_df <- adult_df[,-1]
+adult_df$`NA.` <- as.factor(adult_df$`NA.`)
+
+#List of all predictors
+predictors <- setdiff(names(adult_df), "NA.")
+
+
+#2nd diminsion random predictors 
+all_combos2 <- combn(predictors, 2)
+random_combos2 <- sample(all_combos2, 5)
+
+#3rd diminsion random predictors 
+all_combos3 <- combn(predictors, 3)
+random_combos3 <- sample(all_combos3, 5)  
+
+#4th diminsion random predictors 
+all_combos4 <- combn(predictors, 4)
+random_combos4 <- sample(all_combos4, 5)
+
+#5th diminsion random predictors 
+all_combos5 <- combn(predictors, 5)
+random_combos5 <- sample(all_combos5, 5)  
+
+#Set lists
+model_info <- list()
+best_models_info <- list()
+predictor_count <- setNames(rep(0, length(predictors)), predictors)
+
+#Modeling loop for 1 diminsion
+for (var in predictors) {
+  
+  formula <- as.formula(paste("`NA.` ~", var))
+  model <- glm(formula, data = adult_df, family = binomial)
+  
+  #Save info and update counts
+  coeffs <- summary(model)$coefficients
+  model_info[[var]] <- list(
+    variables = var,
+    coefficients = coeffs[, "Estimate"],
+    p_values = coeffs[, "Pr(>|z|)"],
+    AIC = AIC(model)
+  )
+  predictor_count[var] <- predictor_count[var] + 1
+}
+
+#Modeling loop for 2 diminsion
+for (vars in random_combos2) {
+  model_name <- paste(vars, collapse = "_")
+  formula <- as.formula(paste("`NA.` ~", paste(vars, collapse = " + ")))
+  model <- glm(formula, data = adult_df, family = binomial)
+  
+  #Save info and update counts
+  coeffs <- summary(model)$coefficients
+  model_info[[paste0("p2_", model_name)]] <- list(
+    variables = vars,
+    coefficients = coeffs[, "Estimate"],
+    p_values = coeffs[, "Pr(>|z|)"],
+    AIC = AIC(model)
+  )
+  
+  for (var in vars) predictor_count[var] <- predictor_count[var] + 1
+}
+
+#Modeling loop for 3 diminsion
+for (vars in random_combos3) {
+  model_name <- paste(vars, collapse = "_")
+  formula <- as.formula(paste("`NA.` ~", paste(vars, collapse = " + ")))
+  model <- glm(formula, data = adult_df, family = binomial)
+  
+  #Save info and update counts
+  coeffs <- summary(model)$coefficients
+  model_info[[paste0("p3_", model_name)]] <- list(
+    variables = vars,
+    coefficients = coeffs[, "Estimate"],
+    p_values = coeffs[, "Pr(>|z|)"],
+    AIC = AIC(model)
+  )
+  
+  for (var in vars) predictor_count[var] <- predictor_count[var] + 1
+}
+
+#Modeling loop for 4 diminsion
+
+for (vars in random_combos4) {
+  model_name <- paste(vars, collapse = "_")
+  formula <- as.formula(paste("`NA.` ~", paste(vars, collapse = " + ")))
+  model <- glm(formula, data = adult_df, family = binomial)
+  
+  #Save info and update counts
+  coeffs <- summary(model)$coefficients
+  model_info[[paste0("p4_", model_name)]] <- list(
+    variables = vars,
+    coefficients = coeffs[, "Estimate"],
+    p_values = coeffs[, "Pr(>|z|)"],
+    AIC = AIC(model)
+  )
+  
+  for (var in vars) predictor_count[var] <- predictor_count[var] + 1
+}
+
+#Modeling loop for 5 diminsion
+
+for (vars in random_combos5) {
+  model_name <- paste(vars, collapse = "_")
+  formula <- as.formula(paste("`NA.` ~", paste(vars, collapse = " + ")))
+  model <- glm(formula, data = adult_df, family = binomial)
+  
+  #Save info and update counts
+  coeffs <- summary(model)$coefficients
+  model_info[[paste0("p5_", model_name)]] <- list(
+    variables = vars,
+    coefficients = coeffs[, "Estimate"],
+    p_values = coeffs[, "Pr(>|z|)"],
+    AIC = AIC(model)
+  )
+  
+  for (var in vars) predictor_count[var] <- predictor_count[var] + 1
+}
 ```
 
 ## 6.1 Best model per dimension
 
+We will use AIC to measure model performance (i.e. the lower the AIC, the better the model). Create a tidy data frame with one row per dimension \(p^*\) containing:
+
+- predictors in the best model
+- AIC value
+- number of parameters
+
 ```{r}
+#Best 1 dimension model
+best_name <- names(which.min(sapply(model_info[1:length(predictors)], function(x) x$AIC)))
+best_models_info$p1 <- list(
+  predictors = model_info[[best_name]]$variables,
+  AIC = model_info[[best_name]]$AIC,
+  n_params = length(model_info[[best_name]]$coefficients)
+)
+
+#Best 2 dimension model
+p2_names <- grep("^p2_", names(model_info))
+best_name <- p2_names[which.min(sapply(model_info[p2_names], function(x) x$AIC))]
+best_models_info$p2 <- list(
+  predictors = model_info[[best_name]]$variables,
+  AIC = model_info[[best_name]]$AIC,
+  n_params = length(model_info[[best_name]]$coefficients)
+)
+
+#Best 3 dimension model
+p3_names <- grep("^p3_", names(model_info))
+best_name <- p3_names[which.min(sapply(model_info[p3_names], function(x) x$AIC))]
+best_models_info$p3 <- list(
+  predictors = model_info[[best_name]]$variables,
+  AIC = model_info[[best_name]]$AIC,
+  n_params = length(model_info[[best_name]]$coefficients)
+)
+
+#Best 4 dimension model
+p4_names <- grep("^p4_", names(model_info))
+best_name <- p4_names[which.min(sapply(model_info[p4_names], function(x) x$AIC))]
+best_models_info$p4 <- list(
+  predictors = model_info[[best_name]]$variables,
+  AIC = model_info[[best_name]]$AIC,
+  n_params = length(model_info[[best_name]]$coefficients)
+)
+
+#Best 5 dimension model
+p5_names <- grep("^p5_", names(model_info))
+best_name <- p5_names[which.min(sapply(model_info[p5_names], function(x) x$AIC))]
+best_models_info$p5 <- list(
+  predictors = model_info[[best_name]]$variables,
+  AIC = model_info[[best_name]]$AIC,
+  n_params = length(model_info[[best_name]]$coefficients)
+)
+```
+
+Create boxplots representing the distribution of AIC values across all dimensions 1 to 5.
+
+```{r}
+#Empty list to store AIC values
+aic_list <- list()
+
+#Extract AIC values for each diminsion
+for (dim in 1:5) {
+  if (dim == 1) {
+    #1 diminsion
+    model_names <- names(model_info)[1:length(predictors)]
+  } else {
+    #2-5 diminsion
+    model_names <- grep(paste0("^p", dim, "_"), names(model_info))
+  }
+  
+  aic_list[[dim]] <- sapply(model_info[model_names], function(x) x$AIC)
+}
+
+# Create boxplot
+boxplot(aic_list,
+        names = 1:5,
+        main = "Distribution of AIC Values Across Dimensions",
+        xlab = "Dimension",
+        ylab = "AIC")
 ```
