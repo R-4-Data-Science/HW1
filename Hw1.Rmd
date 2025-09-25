@@ -234,16 +234,6 @@ AIC(lm_fit) #not the same as the calculated AIC
 
 # 6 Model Selection
 
-The “adult.csv” dataset can be found on Canvas (Files/Data) and collects census information paired with individuals’ salary and earnings. We want to explain/predict the binary response = NA., which represents whether an individual’s income is above \(50\)k, using all other columns as predictors. Therefore you will be using logistic regression (see glm function). More specifically, the goal is to estimate \(m = 5\) models per dimension, with dimensions going from 1 to \(p_{max}\) (i.e. \(p^* = 1,..., p_{max}\)). For this data we have \(p = 14\) variables (in addition to the response) so in the first dimension you will estimate all 14 one-variable models. Then, in the second dimension, we estimate \(m\) distinct randomly chosen two-variable models (each with distinct variable combinations in them), and so on for all other dimensions up to \(p_{max} = 5\).
-
-For all dimensions, make sure you save:
-
-- the variables in each model, with their regression coefficients and their p-values
-- the AIC of each model
-- a table representing the number of models each predictor is included in
-
-We the want to store all these into a single object.
-
 ```{r}
 #Load Data
 adult_df <- read.csv("adult.csv", sep = ";")
@@ -257,19 +247,19 @@ predictors <- setdiff(names(adult_df), "NA.")
 
 
 #2nd diminsion random predictors 
-all_combos2 <- combn(predictors, 2)
+all_combos2 <- combn(predictors, 2, simplify = FALSE)
 random_combos2 <- sample(all_combos2, 5)
 
 #3rd diminsion random predictors 
-all_combos3 <- combn(predictors, 3)
+all_combos3 <- combn(predictors, 3, simplify = FALSE)
 random_combos3 <- sample(all_combos3, 5)  
 
 #4th diminsion random predictors 
-all_combos4 <- combn(predictors, 4)
+all_combos4 <- combn(predictors, 4, simplify = FALSE)
 random_combos4 <- sample(all_combos4, 5)
 
 #5th diminsion random predictors 
-all_combos5 <- combn(predictors, 5)
+all_combos5 <- combn(predictors, 5, simplify = FALSE)
 random_combos5 <- sample(all_combos5, 5)  
 
 #Set lists
@@ -371,11 +361,7 @@ for (vars in random_combos5) {
 
 ## 6.1 Best model per dimension
 
-We will use AIC to measure model performance (i.e. the lower the AIC, the better the model). Create a tidy data frame with one row per dimension \(p^*\) containing:
-
-- predictors in the best model
-- AIC value
-- number of parameters
+For each dimension (1–5), we identified the model with the lowest AIC. The best one-variable model was based on relationship; higher-dimensional best models typically included variables like education.num, hours.per.week, and sex. 
 
 ```{r}
 #Best 1 dimension model
@@ -421,9 +407,20 @@ best_models_info$p5 <- list(
   AIC = model_info[[best_name]]$AIC,
   n_params = length(model_info[[best_name]]$coefficients)
 )
+
+best_df <- do.call(rbind, lapply(names(best_models_info), function(dim) {
+  data.frame(
+    dimension = dim,
+    predictors = paste(best_models_info[[dim]]$predictors, collapse = ", "),
+    AIC = best_models_info[[dim]]$AIC,
+    n_params = best_models_info[[dim]]$n_params
+  )
+}))
+
+best_df
 ```
 
-Create boxplots representing the distribution of AIC values across all dimensions 1 to 5.
+The distributions show that higher-dimensional models generally achieve lower AIC values, indicating better fit, though variation exists due to the random selection of predictors in dimensions 2–5.
 
 ```{r}
 #Empty list to store AIC values
@@ -448,4 +445,49 @@ boxplot(aic_list,
         main = "Distribution of AIC Values Across Dimensions",
         xlab = "Dimension",
         ylab = "AIC")
+```
+
+```{r}
+predictor_count_tbl <- data.frame(
+  predictor = names(predictor_count),
+  count = as.integer(predictor_count),
+  row.names = NULL
+)
+predictor_count_tbl <- predictor_count_tbl[order(-predictor_count_tbl$count,
+                                                 predictor_count_tbl$predictor),
+                                           ]
+
+knitr::kable(predictor_count_tbl,
+             caption = "How often each predictor appears across all fitted models",
+             align = c("l","r"),
+             digits = 0)
+```
+
+```{r}
+get_dim <- function(nm) {
+  if (grepl("^p\\d+_", nm)) as.integer(sub("^p(\\d+)_.*", "\\1", nm)) else 1L
+}
+
+per_model_tbl <- do.call(
+  rbind,
+  lapply(names(model_info), function(nm) {
+    info <- model_info[[nm]]
+    data.frame(
+      model_id   = nm,
+      dimension  = get_dim(nm),
+      predictors = paste(info$variables, collapse = ", "),
+      AIC        = as.numeric(info$AIC),
+      n_params   = length(info$coefficients),
+      stringsAsFactors = FALSE
+    )
+  })
+)
+
+# Order by dimension then AIC
+per_model_tbl <- per_model_tbl[order(per_model_tbl$dimension, per_model_tbl$AIC), ]
+
+knitr::kable(per_model_tbl,
+             caption = "Per-model summary: predictors, AIC, and parameter count",
+             align = c("l","r","l","r","r"),
+             digits = 2)
 ```
